@@ -1,4 +1,8 @@
+using FastEndpoints;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddFastEndpoints();
 
 // Add services to the container.
 
@@ -12,5 +16,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseFastEndpoints();
 
 app.Run();
