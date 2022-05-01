@@ -2,13 +2,14 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FastEndpoints" Version="4.1.0" />
+      <PackageReference Include="YoutubeExplode" Version="6.1.2" />
     </ItemGroup>
 
 </Project>
