@@ -1,8 +1,15 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FastEndpoints;
+using YoutubeExplode;
+using YtdlApi.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddFastEndpoints();
+
+builder.Services.AddTransient<YoutubeClient>();
+builder.Services.AddTransient<IYouTubeStreamService, YoutubeExplodeStreamService>();
 
 // Add services to the container.
 
