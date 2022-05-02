@@ -12,17 +12,20 @@ public class YoutubeExplodeStreamService : IYouTubeStreamService
         _youtube = youtube;
     }
     
-    public async Task<Stream> GetStreamAsync(string videoId, Format format, Quality quality, string filename)
+    public async Task<StreamContainer> GetStreamAsync(string videoId, Format format, Quality quality,
+        CancellationToken cancellationToken)
     {
-        var video = await _youtube.Videos.GetAsync(videoId);
+        var video = await _youtube.Videos.GetAsync(videoId, cancellationToken);
 
-        var manifest = await _youtube.Videos.Streams.GetManifestAsync(video.Id);
+        var manifest = await _youtube.Videos.Streams.GetManifestAsync(video.Id, cancellationToken);
 
         var streamInfo = GetBestStream(manifest, format, quality);
+        
+        var stream = await _youtube.Videos.Streams.GetAsync(streamInfo, cancellationToken);
 
-        return await _youtube.Videos.Streams.GetAsync(streamInfo);
+        return new StreamContainer(stream, streamInfo.Container.Name, video.Title);
     }
-
+    
     private static IStreamInfo GetBestStream(StreamManifest manifest, Format format, Quality quality)
     {
         return format switch
@@ -46,12 +49,7 @@ public class YoutubeExplodeStreamService : IYouTubeStreamService
 
     private static IStreamInfo GetStreamByQuality(IEnumerable<IAudioStreamInfo> streams, Quality quality)
     {
-        return quality switch
-        {
-            Quality.Video => throw new ArgumentOutOfRangeException(nameof(quality), quality,
-                "Cannot get highest video quality for audio streams."),
-            _ => streams.GetWithHighestBitrate()
-        };
+        return streams.GetWithHighestBitrate();
     }
 
     private static IStreamInfo GetStreamByQuality(IEnumerable<MuxedStreamInfo> streams, Quality quality)
