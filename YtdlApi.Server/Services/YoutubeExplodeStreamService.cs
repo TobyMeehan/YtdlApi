@@ -1,5 +1,7 @@
 using YoutubeExplode;
+using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
+using YtdlApi.Server.Exceptions;
 
 namespace YtdlApi.Server.Services;
 
@@ -15,7 +17,21 @@ public class YoutubeExplodeStreamService : IYouTubeStreamService
     public async Task<StreamContainer> GetStreamAsync(string videoId, Format format, Quality quality,
         CancellationToken cancellationToken)
     {
-        var video = await _youtube.Videos.GetAsync(videoId, cancellationToken);
+        Video video;
+
+        try
+        {
+            video = await _youtube.Videos.GetAsync(videoId, cancellationToken);
+        }
+        catch (YoutubeExplode.Exceptions.VideoUnavailableException unavailableException)
+        {
+            throw new YouTubeNotFoundException($"Video {videoId} is unavailable or does not exist.",
+                unavailableException);
+        }
+        catch (ArgumentException argumentException)
+        {
+            throw new YouTubeBadRequestException(argumentException.Message, argumentException);
+        }
 
         var manifest = await _youtube.Videos.Streams.GetManifestAsync(video.Id, cancellationToken);
 

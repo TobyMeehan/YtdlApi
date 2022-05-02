@@ -22,6 +22,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseDefaultExceptionHandler();
 app.UseAuthorization();
 app.UseFastEndpoints();
 
