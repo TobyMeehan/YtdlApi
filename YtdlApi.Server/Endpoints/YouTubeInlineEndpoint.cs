@@ -1,23 +1,23 @@
+using System.Net.Mime;
 using FastEndpoints;
-using FluentValidation.Results;
 using YtdlApi.Server.Exceptions;
 using YtdlApi.Server.Services;
 
 namespace YtdlApi.Server.Endpoints;
 
-public class YoutubeEndpoint : Endpoint<YouTubeRequest>
+public class YouTubeInlineEndpoint : Endpoint<YouTubeRequest>
 {
     private readonly IYouTubeStreamService _youtube;
 
-    public YoutubeEndpoint(IYouTubeStreamService youtube)
+    public YouTubeInlineEndpoint(IYouTubeStreamService youtube)
     {
         _youtube = youtube;
     }
-    
+
     public override void Configure()
     {
         Verbs(Http.GET, Http.POST);
-        Routes("/", "/{Id}");
+        Routes("/embed", "/embed/{Id}");
         AllowAnonymous();
     }
 
@@ -40,8 +40,9 @@ public class YoutubeEndpoint : Endpoint<YouTubeRequest>
             return;
         }
         
-        var filename = $"{req.Filename ?? stream.Name}.{stream.Type}";
+        HttpContext.Response.Headers.Add("Content-Disposition", "inline");
 
-        await SendStreamAsync(stream.Stream, filename, contentType: MimeTypes.GetMimeType(filename), enableRangeProcessing: true, cancellation: ct);
+        await SendStreamAsync(stream.Stream, contentType: MimeTypes.GetMimeType($"x.{stream.Type}"),
+            enableRangeProcessing: true, cancellation: ct);
     }
 }
